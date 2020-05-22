@@ -14,6 +14,32 @@ export class AppService {
   private static quotationMarkRegex = new RegExp('"', 'g');
 
   /**
+   * Get yesterday's data for given country.
+   */
+  getCurrentDailyValuesForCountry(country: string) {
+    const dateString = AppService.getYesterdayDateString();
+    return this.getDailyValuesForCountry(country, dateString);
+  }
+
+  /**
+   * Get data for given country on given day.
+   *
+   * @param country
+   * @param dateString date in YYYY-MM-DD format
+   */
+  getDailyValuesForCountry(country: string, dateString: string) {
+    const lowerCaseCountry = country.toLowerCase();
+    const allCountries = this.getDailyValues(dateString);
+    if (allCountries instanceof Array) {
+      return allCountries.find(countryData => countryData.countryregion.toLowerCase() == lowerCaseCountry);
+    } else {
+      return allCountries.pipe(
+        map(allCountries => allCountries.find(countryData => countryData.countryregion.toLowerCase() == lowerCaseCountry))
+      );
+    }
+  }
+
+  /**
    * Get yesterday's data for all countries.
    */
   getCurrentDailyValues(): Array<CountryDataDto> | Observable<Array<CountryDataDto>> {

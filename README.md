@@ -23,3 +23,9 @@ Retrieve daily data for all countries.
  
 **Query params**
 - *date* (optional): YYYY-MM-DD format; day for which the data will be obtained (yesterday if not given) 
+
+##### [GET] /countries/:country
+Retrieve daily data for given country.
+ 
+**Query params**
+- *date* (optional): YYYY-MM-DD format; day for which the data will be obtained (yesterday if not given) 

@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -17,4 +17,17 @@ export class AppController {
       return this.appService.getCurrentDailyValues();
     }
   }
+
+  @Get('/countries/:country')
+  getDataForCountry(
+    @Param('country') country: string,
+    @Query('date') dateString: string
+  ) {
+    if (dateString) {
+      return this.appService.getDailyValuesForCountry(country, dateString);
+    } else {
+      return this.appService.getCurrentDailyValuesForCountry(country);
+    }
+  }
+
 }
