@@ -35,4 +35,14 @@ export class AppController {
     }
   }
 
+  @Get('/timeseries')
+  getTimeseriesData(
+    @Query('country') country: string
+  ) {
+    if (country) {
+      return this.appService.getTimeseriesDataForCountry(country);
+    } else {
+      return this.appService.getTimeseriesData();
+    }
+  }
 }

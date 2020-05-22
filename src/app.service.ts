@@ -4,6 +4,8 @@ import { Observable } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { DailyDataColumnIndexesDto } from "./dto/DailyDataColumnIndexesDto";
 import { OverviewDto } from "./dto/OverviewDto";
+import { CountryTimeseriesDataDto } from "./dto/CountryTimeseriesDataDto";
+import { SeriesEntryDto } from "./dto/SeriesEntryDto";
 
 @Injectable()
 export class AppService {
@@ -12,6 +14,7 @@ export class AppService {
   ) {}
 
   private datesToCountriesData: Map<string, Array<CountryDataDto>> = new Map();
+  private static timeseriesUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
   private static quotationMarkRegex = new RegExp('"', 'g');
 
   /**
@@ -85,6 +88,26 @@ export class AppService {
     );
   }
 
+  /**
+   * Get confirmed cases numbers history for given country.
+   */
+  getTimeseriesDataForCountry(country: string): Observable<CountryTimeseriesDataDto> {
+    const lowerCaseCountry = country.toLowerCase();
+    return this.getTimeseriesData().pipe(
+      map(data => data.find(it => it.countryregion.toLowerCase() === lowerCaseCountry)),
+    );
+  }
+
+  /**
+   * Get confirmed cases numbers history for all countries.
+   */
+  getTimeseriesData(): Observable<Array<CountryTimeseriesDataDto>> {
+    const dataObservable = this.getTimeseriesCSVData();
+    return dataObservable.pipe(
+      map(data => AppService.parseTimeseriesData(data)),
+    );
+  }
+
   private static reduceDailyDataIntoOverview(data: Array<CountryDataDto>): OverviewDto {
     const overview: OverviewDto = {
       confirmed: 0,
@@ -146,6 +169,38 @@ export class AppService {
     return Array.from(countriesToData.values());
   }
 
+  private static parseTimeseriesData(data: string): Array<CountryTimeseriesDataDto> {
+    const rows = data.split('\n');
+    const topRow = rows[0].split(',');
+    const countriesToData = new Array<CountryTimeseriesDataDto>();
+    const timeEntriesStartIndex = 4;
+    for (const rowString of rows.slice(1)) {
+      const metaRowString = rowString.replace(', ', '@');  // little hack to avoid issues with things like "Korea, South"
+      const row = metaRowString.split(',');
+      if (row.length < 4) {
+        continue  // broken row or empty row at the end of the file
+      }
+      const country = row[1].replace('@', ', ').replace(this.quotationMarkRegex, '');
+      const seriesEntries = new Array<SeriesEntryDto>();
+      topRow.slice(timeEntriesStartIndex).forEach(
+        (value, index) => {
+          seriesEntries.push({
+            date: value,
+            value: Number(row[index + timeEntriesStartIndex]),
+          });
+        }
+      );
+      countriesToData.push({
+        provincestate: row[0],
+        countryregion: country,
+        lat: Number(row[2]),
+        long: Number(row[3]),
+        series: seriesEntries,
+      })
+    }
+    return countriesToData;
+  }
+
   private getDailyCSVData(dateString: string): Observable<string> {
     const url = AppService.buildDailyFileUrl(dateString);
     return this.httpService.get(url).pipe(
@@ -156,6 +211,15 @@ export class AppService {
         }
         throw new HttpException(e.response.data, e.response.status);
       }),
+    );
+  }
+
+  private getTimeseriesCSVData(): Observable<string> {
+    return this.httpService.get(AppService.timeseriesUrl).pipe(
+      map(response => response.data),
+      catchError(e => {
+        throw new HttpException(`Failed to retrieve timeseries data from GitHub: ${e.response.data}`, e.response.status);
+      })
     );
   }
 

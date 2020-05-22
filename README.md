@@ -32,3 +32,9 @@ Retrieve daily data for given country.
  
 **Query params**
 - *date* (optional): YYYY-MM-DD format; day for which the data will be obtained (yesterday if not given) 
+
+##### [GET] /timeseries
+Obtain daily confirmed cases numbers history.
+ 
+**Query params**
+- *country* (optional): country for which the data will be obtained (all countries if not given) 
