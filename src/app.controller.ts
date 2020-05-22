@@ -7,6 +7,11 @@ export class AppController {
     private readonly appService: AppService
   ) {}
 
+  @Get('/brief')
+  getOverview() {
+    return this.appService.getOverview();
+  }
+
   @Get('/countries')
   getData(
     @Query('date') dateString: string

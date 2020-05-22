@@ -18,6 +18,9 @@ npm run start
 
 #### Endpoints
 
+##### [GET] /brief
+Get summary of yesterday's figures.
+ 
 ##### [GET] /countries
 Retrieve daily data for all countries.
  

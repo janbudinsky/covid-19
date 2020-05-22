@@ -3,6 +3,7 @@ import { CountryDataDto } from "./dto/CountryDataDto";
 import { Observable } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { DailyDataColumnIndexesDto } from "./dto/DailyDataColumnIndexesDto";
+import { OverviewDto } from "./dto/OverviewDto";
 
 @Injectable()
 export class AppService {
@@ -12,6 +13,21 @@ export class AppService {
 
   private datesToCountriesData: Map<string, Array<CountryDataDto>> = new Map();
   private static quotationMarkRegex = new RegExp('"', 'g');
+
+  /**
+   * Get overview with summary of yesterday's numbers.
+   */
+  getOverview() {
+    const dateString = AppService.getYesterdayDateString();
+    const allCountries = this.getDailyValues(dateString);
+    if (allCountries instanceof Array) {
+      return AppService.reduceDailyDataIntoOverview(allCountries);
+    } else {
+      return allCountries.pipe(
+        map(allCountries => AppService.reduceDailyDataIntoOverview(allCountries)),
+      );
+    }
+  }
 
   /**
    * Get yesterday's data for given country.
@@ -67,6 +83,24 @@ export class AppService {
         }
       ),
     );
+  }
+
+  private static reduceDailyDataIntoOverview(data: Array<CountryDataDto>): OverviewDto {
+    const overview: OverviewDto = {
+      confirmed: 0,
+      deaths: 0,
+      recovered: 0
+    };
+    return data.reduce<OverviewDto>(
+      (sum, countryData) => {
+        return {
+          confirmed: sum.confirmed + countryData.confirmed,
+          deaths: sum.deaths + countryData.deaths,
+          recovered: sum.recovered + countryData.recovered
+        };
+      },
+      overview
+    )
   }
 
   private static parseDailyData(data: string): Array<CountryDataDto> {
