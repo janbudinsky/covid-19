@@ -13,7 +13,7 @@ export class AppService {
     private httpService: HttpService,
   ) {}
 
-  private datesToCountriesData: Map<string, Array<CountryDataDto>> = new Map();
+  private datesToCountriesData = new Map<string, Array<CountryDataDto>>();
   private static timeseriesUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
   private static quotationMarkRegex = new RegExp('"', 'g');
 
@@ -53,7 +53,7 @@ export class AppService {
       return allCountries.find(countryData => countryData.countryregion.toLowerCase() == lowerCaseCountry);
     } else {
       return allCountries.pipe(
-        map(allCountries => allCountries.find(countryData => countryData.countryregion.toLowerCase() == lowerCaseCountry))
+        map(allCountries => allCountries.find(countryData => countryData.countryregion.toLowerCase() == lowerCaseCountry)),
       );
     }
   }
@@ -112,17 +112,17 @@ export class AppService {
     const overview: OverviewDto = {
       confirmed: 0,
       deaths: 0,
-      recovered: 0
+      recovered: 0,
     };
     return data.reduce<OverviewDto>(
       (sum, countryData) => {
         return {
           confirmed: sum.confirmed + countryData.confirmed,
           deaths: sum.deaths + countryData.deaths,
-          recovered: sum.recovered + countryData.recovered
+          recovered: sum.recovered + countryData.recovered,
         };
       },
-      overview
+      overview,
     )
   }
 
@@ -131,7 +131,7 @@ export class AppService {
     const topRow = rows[0].split(',');
     const dataIndexes = this.getDailyDataIndexesDto(topRow);
     // data have granularity of individual regions, merge them all into one country, since that's the only decomposition level for geographical data
-    const countriesToData: Map<string, CountryDataDto> = new Map();
+    const countriesToData = new Map<string, CountryDataDto>();
     for (const rowString of rows.slice(1)) {  // iterate rows except the top one
       const metaRowString = rowString.replace(', ', '@');  // little hack to avoid issues with things like "Korea, South"
       const row = metaRowString.split(',');
