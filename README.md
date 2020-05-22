@@ -15,3 +15,11 @@ To run the app use:
 ```bash
 npm run start
 ```
+
+#### Endpoints
+
+##### [GET] /countries
+Retrieve daily data for all countries.
+ 
+**Query params**
+- *date* (optional): YYYY-MM-DD format; day for which the data will be obtained (yesterday if not given) 
