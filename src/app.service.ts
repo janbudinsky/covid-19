@@ -20,7 +20,7 @@ export class AppService {
   /**
    * Get overview with summary of yesterday's numbers.
    */
-  getOverview() {
+  getOverview(): OverviewDto | Observable<OverviewDto> {
     const dateString = AppService.getYesterdayDateString();
     const allCountries = this.getDailyValues(dateString);
     if (allCountries instanceof Array) {
@@ -35,7 +35,7 @@ export class AppService {
   /**
    * Get yesterday's data for given country.
    */
-  getCurrentDailyValuesForCountry(country: string) {
+  getCurrentDailyValuesForCountry(country: string): CountryDataDto | Observable<CountryDataDto> {
     const dateString = AppService.getYesterdayDateString();
     return this.getDailyValuesForCountry(country, dateString);
   }
@@ -46,7 +46,7 @@ export class AppService {
    * @param country
    * @param dateString date in YYYY-MM-DD format
    */
-  getDailyValuesForCountry(country: string, dateString: string) {
+  getDailyValuesForCountry(country: string, dateString: string): CountryDataDto | Observable<CountryDataDto> {
     const lowerCaseCountry = country.toLowerCase();
     const allCountries = this.getDailyValues(dateString);
     if (allCountries instanceof Array) {
