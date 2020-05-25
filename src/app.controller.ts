@@ -45,4 +45,12 @@ export class AppController {
       return this.appService.getTimeseriesData();
     }
   }
+
+  @Get('/final')
+  getNameAndRating() {
+    return {
+      name: "Budinsky",
+      rating: 4
+    }
+  }
 }
